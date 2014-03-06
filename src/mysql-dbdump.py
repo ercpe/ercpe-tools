@@ -10,29 +10,24 @@ import re
 import sys
 
 class DatabaseDumper(object):
-	host = None
-	user = None
-	password = None
-	seperate_databases = True
-	compress = True
-	output_dir = None
 	filename_pattern_single = "{YEAR}-{MONTH}-{DAY}-{DATABASE}.sql"
 	filename_pattern_all = "{YEAR}-{MONTH}-{DAY}-ALL.sql"
 	
-	def __init__(self, host, user, password, output_dir, one_file_per_database, compress):
+	def __init__(self, host, user, password, output_dir, one_file_per_database, compress, dump_opts):
 		self.host = host
 		self.user = user
 		self.password = password
 		self.seperate_databases = one_file_per_database
 		self.compress = compress
 		self.output_dir = output_dir
+		self.dump_opts = dump_opts
 	
 	def get_db_names(self):
 		connection = None
 		cursor = None
 		
 		tables = []
-		
+
 		try:
 			connection = MySQLdb.connect(self.host, self.user, self.password, 'mysql')
 			
@@ -54,7 +49,7 @@ class DatabaseDumper(object):
 		logging.debug("Dumping database '%s' to '%s'" % (database, outfile))
 
 		cmd = "/usr/bin/mysqldump"
-		cmdargs = "-u %s --password=%s -h %s --disable-keys --skip-add-locks --events --databases %s -r %s" % (self.user, self.password, self.host, database, outfile)
+		cmdargs = "-u %s --password=%s -h %s --disable-keys --skip-add-locks --quote-names --events --databases %s %s -r %s" % (self.user, self.password, self.host, database, self.dump_opts, outfile)
 
 		os.system("%s %s" % (cmd, cmdargs))
 
@@ -62,9 +57,7 @@ class DatabaseDumper(object):
 		logging.debug("Dumping all databases '%s'" % outfile)
 
 		cmd = "/usr/bin/mysqldump"
-		cmdargs = "-u %s --password=%s -h %s --disable-keys --skip-add-locks --events -A -r %s" % (self.user, self.password, self.host, outfile)
-
-		#print "%s %s" % (cmd, cmdargs)
+		cmdargs = "-u %s --password=%s -h %s --disable-keys --skip-add-locks --quote-names --events -A %s -r %s" % (self.user, self.password, self.host, self.dump_opts, outfile)
 
 		os.system("%s %s" % (cmd, cmdargs))
 
@@ -145,5 +138,5 @@ if __name__ == '__main__':
 		parser.print_help()
 		sys.exit(1)
 	
-	dumper = DatabaseDumper(options.server, options.user, options.password, options.directory, True, True)
+	dumper = DatabaseDumper(options.server, options.user, options.password, options.directory, True, True, ' '.join(args))
 	dumper.execute()
