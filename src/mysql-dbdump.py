@@ -1,19 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''
-Copyright Information
-2010 Johann Schmitz, Duesseldorf, Germany
-
-@author Johann Schmitz (johann@j-schmitz.net)
-@version $Id$
-
-Web:  www.j-schmitz.net
-Mail: johann@j-schmitz.net
-
-Created: 18.04.2010
-'''
-
 import MySQLdb
 import logging
 import os
