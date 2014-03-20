@@ -80,7 +80,7 @@ exec /usr/bin/php-cgi
 class VhostConfigurator(object):
 
 	def __init__(self, vhost):
-		m = re.match("^(?P<subdomain>[\w\d\-_]+)\.(?P<domain>[\w\d\-_]+)\.(?P<tld>[\w\d]+)$", vhost, re.IGNORECASE)
+		m = re.match("^(?P<subdomain>[\w\d\-_]+)\.(?P<domain>[\w\d\-_\.]+)\.(?P<tld>[\w\d]+)$", vhost, re.IGNORECASE)
 		if not m:
 			raise Exception("Illegal fqdn: '%s'" % vhost)
 
