@@ -7,9 +7,9 @@ import logging
 import traceback
 import argparse
 import re
-from sh import chown, chmod, chattr, useradd #@UnresolvedImport
+from sh import chown, chmod, chattr, useradd, mergeini #@UnresolvedImport
 import shutil
-from mergeini import merge
+#from mergeini import merge
 
 __version__ = 0.1
 
@@ -156,13 +156,14 @@ class VhostConfigurator(object):
 		for x in ['conf', 'fcgi']:
 			os.makedirs(os.path.join(self.vhost_dir, x), 0755)
 
-		global_updates = os.path.join(self.script_dir, 'vhost.ini')
+		global_updates = os.path.join(self.globals_dir, 'vhost.ini')
 		vhost_updates = os.path.join(self.vhost_dir, 'conf/vhost.ini')
 		vhost_ini = os.path.join(self.vhost_dir, 'conf/php.ini')
 
 		if os.path.isfile(global_updates):
 			shutil.copy(global_updates, vhost_updates)
-			merge(None, vhost_updates, vhost_ini, vhost_dir=self.vhost_dir)
+			#merge(None, vhost_updates, vhost_ini, vhost_dir=self.vhost_dir)
+			mergeini("-v", self.vhost_dir, "-o", vhost_ini, global_updates, vhost_updates)
 
 		d = {
 			'vhost_dir': self.vhost_dir
@@ -217,8 +218,9 @@ def main(argv=None):
 		lang_group = parser.add_argument_group('Scripting languages')
 		lang_group.add_argument("--php", dest='enable_php', action='store_true',
 								default=False, help="Enable PHP via FastCGI for this vhost (default: %(default)s)")
+		lang_group.add_argument("--globals-dir", dest="globals_dir", help="Location of the master file")
 		lang_group.add_argument("--master-ini", dest="master_phpini",
-								default=None, help="Master php.ini file (default: autodetect)")
+								default=None, help="Master (distribution) php.ini file (default: autodetect)")
 
 		security_group = parser.add_argument_group('Security')
 		security_group.add_argument('--no-suexec', dest='suexec', action='store_false',
