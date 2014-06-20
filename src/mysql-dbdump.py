@@ -104,7 +104,7 @@ class DatabaseDumper(object):
 
 		if databases:
 			for db in databases:
-				if db != "information_schema" or db == "performance_schema":
+				if db != "information_schema" and db != "performance_schema":
 					# dump the current database
 					out = self.get_output_filename(self.filename_pattern_single, { '{DATABASE}': db })
 					self.create_dir_if_not_exists(os.path.dirname(out))
