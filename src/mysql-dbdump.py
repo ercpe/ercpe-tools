@@ -12,7 +12,7 @@ import sys
 class DatabaseDumper(object):
 	filename_pattern_single = "{YEAR}-{MONTH}-{DAY}-{DATABASE}.sql"
 	filename_pattern_all = "{YEAR}-{MONTH}-{DAY}-ALL.sql"
-	
+
 	def __init__(self, host, user, password, output_dir, one_file_per_database, compress, dump_opts):
 		self.host = host
 		self.user = user
@@ -21,16 +21,16 @@ class DatabaseDumper(object):
 		self.compress = compress
 		self.output_dir = output_dir
 		self.dump_opts = dump_opts
-	
+
 	def get_db_names(self):
 		connection = None
 		cursor = None
-		
+
 		tables = []
 
 		try:
 			connection = MySQLdb.connect(self.host, self.user, self.password, 'mysql')
-			
+
 			cursor = connection.cursor()
 			cursor.execute('SHOW DATABASES;')
 
@@ -67,21 +67,21 @@ class DatabaseDumper(object):
 			out = tarfile.TarFile.open(outfile, 'w:bz2')
 
 			out.add(infile, arcname=os.path.basename(infile))
-			
+
 		finally:
 			if out:
 				out.close()
 
 	def get_output_filename(self, filename, additional_replacements=None):
 		file = os.path.join(self.output_dir, filename)
-		
+
 		now = datetime.datetime.now()
-		
+
 		# replace all markers in the filename pattern
 		file = re.compile('{YEAR}', re.IGNORECASE).sub(now.strftime('%Y'), file)
 		file = re.compile('{MONTH}', re.IGNORECASE).sub(now.strftime('%m'), file)
 		file = re.compile('{DAY}', re.IGNORECASE).sub(now.strftime('%d'), file)
-		
+
 		if additional_replacements:
 			# additional_replacements are used f.e. in the db task
 			for search, repl in additional_replacements.iteritems():
@@ -95,7 +95,7 @@ class DatabaseDumper(object):
 
 	def execute(self):
 		databases = None
-		
+
 		# get a list of all databases if seperate_databases = True
 		if self.seperate_databases:
 			databases = self.get_db_names()
@@ -116,7 +116,7 @@ class DatabaseDumper(object):
 			self.create_dir_if_not_exists(os.path.dirname(out))
 			outfiles.append(out)
 			self.dump_all_databases(out)
-		
+
 		# compress the sql file if configured
 		if self.compress:
 			for f in outfiles:
@@ -134,9 +134,9 @@ if __name__ == '__main__':
 
 	(options, args) = parser.parse_args()
 
-	if not options.server or not options.user or not options.password or not options.directory: 
+	if not options.server or not options.user or not options.password or not options.directory:
 		parser.print_help()
 		sys.exit(1)
-	
+
 	dumper = DatabaseDumper(options.server, options.user, options.password, options.directory, True, True, ' '.join(args))
 	dumper.execute()
